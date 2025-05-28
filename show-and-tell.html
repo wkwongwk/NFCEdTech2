@@ -1,0 +1,912 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小朋友展示讲解</title>
+    <style>
+        /* Base styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'KaiTi', cursive, 'Arial Rounded MT Bold', 'Arial', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #ffcce6, #ccf2ff);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+        
+        /* Container styles */
+        .container {
+            background-color: white;
+            border-radius: 24px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            padding: 32px;
+            max-width: 1000px;
+            width: 100%;
+            margin: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* Typography */
+        h1 {
+            color: #8a2be2;
+            text-align: center;
+            font-size: 32px;
+            margin-bottom: 24px;
+        }
+        
+        h2 {
+            color: #4a90e2;
+            font-size: 24px;
+            margin-bottom: 12px;
+            text-align: center;
+        }
+        
+        p {
+            color: #666;
+            margin-top: 16px;
+            text-align: center;
+        }
+        
+        /* Layout */
+        .flex-row {
+            display: flex;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+        
+        .flex-col {
+            flex: 1;
+        }
+        
+        @media (max-width: 768px) {
+            .flex-row {
+                flex-direction: column;
+            }
+        }
+        
+        /* Components */
+        .panel {
+            border-radius: 16px;
+            padding: 16px;
+            height: 100%;
+        }
+        
+        .blue-panel {
+            background-color: #e6f7ff;
+        }
+        
+        .pink-panel {
+            background-color: #fff0f6;
+        }
+        
+        .yellow-panel {
+            background-color: #fffbe6;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+        
+        .media-container {
+            background-color: #f0f0f0;
+            border-radius: 12px;
+            height: 256px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .placeholder {
+            text-align: center;
+            color: #999;
+        }
+        
+        .placeholder svg {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 8px;
+        }
+        
+        video, img, canvas {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        img.contain {
+            object-fit: contain;
+        }
+        
+        /* Buttons */
+        .btn {
+            border: none;
+            border-radius: 9999px;
+            padding: 12px 32px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin: 0 8px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+        }
+        
+        .btn:active {
+            transform: translateY(1px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn-green {
+            background-color: #4caf50;
+            color: white;
+        }
+        
+        .btn-red {
+            background-color: #f44336;
+            color: white;
+        }
+        
+        .btn-blue {
+            background-color: #2196f3;
+            color: white;
+        }
+        
+        .btn-purple {
+            background-color: #9c27b0;
+            color: white;
+        }
+        
+        .btn-center {
+            display: flex;
+            justify-content: center;
+            margin-top: 24px;
+        }
+        
+        /* Recording indicator */
+        .recording-indicator {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        
+        .recording-dot {
+            width: 16px;
+            height: 16px;
+            background-color: #f44336;
+            border-radius: 50%;
+            margin-right: 8px;
+            animation: blink 1s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+        
+        /* Modal */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        
+        .modal-content {
+            background-color: white;
+            border-radius: 16px;
+            padding: 32px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+        }
+        
+        .modal-icon {
+            width: 64px;
+            height: 64px;
+            margin-bottom: 16px;
+            color: #ffb300;
+        }
+        
+        /* Decorations */
+        .bubble {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.4);
+            border-radius: 50%;
+            animation: float 8s infinite ease-in-out;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0) translateX(0); }
+            50% { transform: translateY(-20px) translateX(15px); }
+        }
+        
+        .animal {
+            position: absolute;
+            transition: all 0.5s;
+            width: 80px;
+            height: 80px;
+        }
+        
+        .animal:hover {
+            transform: scale(1.2) rotate(5deg);
+        }
+        
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            opacity: 0;
+        }
+        
+        @keyframes fall {
+            0% { transform: translateY(-100px) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
+        }
+        
+        /* File input styling */
+        .file-input {
+            display: none;
+        }
+        
+        /* Status message */
+        .status-message {
+            background-color: #e8f5e9;
+            border-left: 4px solid #4caf50;
+            padding: 12px;
+            margin-top: 16px;
+            border-radius: 4px;
+            text-align: left;
+        }
+        
+        /* Combined view */
+        .combined-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+        
+        #combinedCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+        }
+        
+        /* Utility classes */
+        .hidden {
+            display: none !important;
+        }
+        
+        .text-center {
+            text-align: center;
+        }
+        
+        .mt-4 {
+            margin-top: 16px;
+        }
+        
+        .mb-4 {
+            margin-bottom: 16px;
+        }
+        
+        /* iOS specific styles */
+        .ios-notice {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 12px;
+            margin-top: 16px;
+            border-radius: 4px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <!-- Background bubbles -->
+    <div class="bubble" style="width: 100px; height: 100px; top: 10%; left: 10%;"></div>
+    <div class="bubble" style="width: 60px; height: 60px; top: 20%; left: 80%;"></div>
+    <div class="bubble" style="width: 80px; height: 80px; top: 70%; left: 15%;"></div>
+    <div class="bubble" style="width: 120px; height: 120px; top: 60%; left: 75%;"></div>
+    
+    <!-- Animals -->
+    <div class="animal" style="top: 20px; left: 20px;">
+        <svg viewBox="0 0 24 24" fill="#FF9E80">
+            <path d="M12,2C6.48,2,2,6.48,2,12c0,5.52,4.48,10,10,10s10-4.48,10-10C22,6.48,17.52,2,12,2z M12,20c-4.42,0-8-3.58-8-8 c0-4.42,3.58-8,8-8s8,3.58,8,8C20,16.42,16.42,20,12,20z"/>
+            <circle cx="8.5" cy="9.5" r="1.5" fill="#5D4037"/>
+            <circle cx="15.5" cy="9.5" r="1.5" fill="#5D4037"/>
+            <path d="M12,16c-1.48,0-2.75-0.81-3.45-2h6.9C14.75,15.19,13.48,16,12,16z" fill="#5D4037"/>
+        </svg>
+    </div>
+    <div class="animal" style="bottom: 20px; right: 20px;">
+        <svg viewBox="0 0 24 24" fill="#80DEEA">
+            <path d="M12,2C6.48,2,2,6.48,2,12c0,5.52,4.48,10,10,10s10-4.48,10-10C22,6.48,17.52,2,12,2z M12,20c-4.42,0-8-3.58-8-8 c0-4.42,3.58-8,8-8s8,3.58,8,8C20,16.42,16.42,20,12,20z"/>
+            <circle cx="8.5" cy="9.5" r="1.5" fill="#5D4037"/>
+            <circle cx="15.5" cy="9.5" r="1.5" fill="#5D4037"/>
+            <path d="M12,13.5c-1.48,0-2.75,0.81-3.45,2h6.9C14.75,14.31,13.48,13.5,12,13.5z" fill="#5D4037"/>
+        </svg>
+    </div>
+    
+    <div class="container">
+        <h1>小朋友的展示与讲解</h1>
+        
+        <!-- Main content container -->
+        <div id="mainContainer">
+            <div class="flex-row">
+                <!-- Left side - webcam -->
+                <div class="flex-col">
+                    <div class="panel blue-panel">
+                        <h2>我的脸</h2>
+                        <div id="webcamContainer" class="media-container">
+                            <video id="webcam" class="hidden" autoplay playsinline muted></video>
+                            <div id="webcamPlaceholder" class="placeholder">
+                                <svg fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
+                                </svg>
+                                <p>点击"开始"按钮显示你的脸</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Right side - image upload -->
+                <div class="flex-col">
+                    <div class="panel pink-panel">
+                        <h2>我的展示物</h2>
+                        <div id="imageContainer" class="media-container" style="cursor: pointer;">
+                            <div id="imagePlaceholder" class="placeholder">
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                </svg>
+                                <p>点击这里上传你的展示物</p>
+                            </div>
+                            <img id="uploadedImage" class="contain hidden" src="" alt="展示物">
+                            <input type="file" id="fileInput" class="file-input" accept="image/*">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="iosNotice" class="ios-notice hidden">
+                <p>📱 iOS设备提示: 请确保已允许Safari访问摄像头和麦克风权限，并且使用Safari浏览器。</p>
+            </div>
+            
+            <div id="statusMessage" class="status-message hidden">
+                <p>状态: <span id="statusText">准备就绪</span></p>
+            </div>
+            
+            <div class="btn-center">
+                <button id="startButton" class="btn btn-green">开始录制</button>
+                <button id="stopButton" class="btn btn-red hidden">停止录制</button>
+            </div>
+            
+            <p>点击"开始录制"按钮，讲解你的展示物</p>
+        </div>
+        
+        <!-- Recording in progress screen -->
+        <div id="recordingContainer" class="hidden">
+            <div class="flex-row">
+                <div class="flex-col">
+                    <div class="panel blue-panel">
+                        <div class="recording-indicator">
+                            <div class="recording-dot"></div>
+                            <span style="color: #f44336; font-weight: bold;">录制中</span>
+                        </div>
+                        <div class="media-container">
+                            <div class="combined-container">
+                                <canvas id="combinedCanvas"></canvas>
+                                <video id="recordingWebcam" autoplay playsinline muted></video>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex-col">
+                    <div class="panel pink-panel">
+                        <h2>我的展示物</h2>
+                        <div class="media-container">
+                            <img id="recordingImage" class="contain" src="" alt="展示物">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="btn-center">
+                <button id="recordingStopButton" class="btn btn-red">停止录制</button>
+            </div>
+        </div>
+        
+        <!-- Playback screen -->
+        <div id="playbackContainer" class="hidden">
+            <div class="text-center mb-4">
+                <h2>你的展示讲解完成啦！</h2>
+                <p>你可以回放或下载你的展示讲解</p>
+            </div>
+            
+            <div class="yellow-panel">
+                <div style="background-color: white; border-radius: 12px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                    <video id="playbackVideo" style="width: 100%; border-radius: 8px;" controls></video>
+                </div>
+            </div>
+            
+            <div class="btn-center">
+                <button id="newRecordingButton" class="btn btn-blue">重新录制</button>
+                <button id="downloadButton" class="btn btn-green">下载视频</button>
+            </div>
+        </div>
+        
+        <!-- Permission denied modal -->
+        <div id="permissionDeniedModal" class="modal hidden">
+            <div class="modal-content">
+                <svg class="modal-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                </svg>
+                <h2 style="color: #8a2be2; margin-bottom: 16px;">需要摄像头权限</h2>
+                <p style="font-size: 18px; margin-bottom: 24px;">请允许使用摄像头，这样才能录制你的展示讲解哦！</p>
+                <button id="permissionOkButton" class="btn btn-purple">好的</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DOM elements
+        const mainContainer = document.getElementById('mainContainer');
+        const recordingContainer = document.getElementById('recordingContainer');
+        const playbackContainer = document.getElementById('playbackContainer');
+        const permissionDeniedModal = document.getElementById('permissionDeniedModal');
+        const iosNotice = document.getElementById('iosNotice');
+        
+        const webcam = document.getElementById('webcam');
+        const webcamPlaceholder = document.getElementById('webcamPlaceholder');
+        const recordingWebcam = document.getElementById('recordingWebcam');
+        const imageContainer = document.getElementById('imageContainer');
+        const imagePlaceholder = document.getElementById('imagePlaceholder');
+        const uploadedImage = document.getElementById('uploadedImage');
+        const recordingImage = document.getElementById('recordingImage');
+        const fileInput = document.getElementById('fileInput');
+        const combinedCanvas = document.getElementById('combinedCanvas');
+        
+        const startButton = document.getElementById('startButton');
+        const stopButton = document.getElementById('stopButton');
+        const recordingStopButton = document.getElementById('recordingStopButton');
+        
+        const playbackVideo = document.getElementById('playbackVideo');
+        const newRecordingButton = document.getElementById('newRecordingButton');
+        const downloadButton = document.getElementById('downloadButton');
+        const permissionOkButton = document.getElementById('permissionOkButton');
+        
+        const statusMessage = document.getElementById('statusMessage');
+        const statusText = document.getElementById('statusText');
+        
+        // Variables
+        let stream = null;
+        let mediaRecorder = null;
+        let recordedChunks = [];
+        let hasSelectedImage = false;
+        let canvasStream = null;
+        let canvasContext = null;
+        let animationFrameId = null;
+        let uploadedImageObj = new Image();
+        
+        // Initialize
+        function init() {
+            console.log("Initializing app...");
+            
+            // Show status message
+            statusMessage.classList.remove('hidden');
+            updateStatus('准备就绪');
+            
+            // Check if iOS device
+            if (isIOS()) {
+                iosNotice.classList.remove('hidden');
+            }
+            
+            // Set up canvas
+            canvasContext = combinedCanvas.getContext('2d');
+            
+            // Set up image upload
+            imageContainer.addEventListener('click', () => {
+                fileInput.click();
+            });
+            
+            fileInput.addEventListener('change', (e) => {
+                if (e.target.files && e.target.files[0]) {
+                    const file = e.target.files[0];
+                    
+                    // Check if file is an image
+                    if (!file.type.match('image.*')) {
+                        alert('请选择图片文件！');
+                        return;
+                    }
+                    
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        uploadedImage.src = event.target.result;
+                        uploadedImage.classList.remove('hidden');
+                        imagePlaceholder.classList.add('hidden');
+                        hasSelectedImage = true;
+                        
+                        // Also load into our image object for canvas
+                        uploadedImageObj.src = event.target.result;
+                        
+                        updateStatus('图片已上传');
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+            
+            // Set up start recording button
+            startButton.addEventListener('click', () => {
+                console.log("Start button clicked");
+                startRecording();
+            });
+            
+            // Set up stop buttons
+            stopButton.addEventListener('click', () => {
+                console.log("Stop button clicked");
+                stopRecording();
+            });
+            
+            recordingStopButton.addEventListener('click', () => {
+                console.log("Recording stop button clicked");
+                stopRecording();
+            });
+            
+            // Set up playback controls
+            newRecordingButton.addEventListener('click', () => {
+                console.log("New recording button clicked");
+                resetApp();
+            });
+            
+            downloadButton.addEventListener('click', () => {
+                console.log("Download button clicked");
+                downloadRecording();
+            });
+            
+            // Set up permission denied modal
+            permissionOkButton.addEventListener('click', () => {
+                console.log("Permission ok button clicked");
+                permissionDeniedModal.classList.add('hidden');
+            });
+            
+            console.log("App initialized");
+        }
+        
+        // Check if device is iOS
+        function isIOS() {
+            return /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+                  (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+        }
+        
+        // Update status
+        function updateStatus(message) {
+            statusText.textContent = message;
+        }
+        
+        // Get supported MIME type
+        function getSupportedMimeType() {
+            const types = [
+                'video/webm;codecs=vp9,opus',
+                'video/webm;codecs=vp8,opus',
+                'video/webm',
+                'video/mp4'
+            ];
+            
+            for (let type of types) {
+                if (MediaRecorder.isTypeSupported(type)) {
+                    return type;
+                }
+            }
+            
+            return '';
+        }
+        
+        // Draw combined view on canvas
+        function drawCombinedView() {
+            if (!combinedCanvas || !canvasContext || !recordingWebcam) return;
+            
+            // Set canvas dimensions to match video
+            const width = recordingWebcam.videoWidth || 640;
+            const height = recordingWebcam.videoHeight || 480;
+            
+            combinedCanvas.width = width;
+            combinedCanvas.height = height;
+            
+            // Clear canvas
+            canvasContext.clearRect(0, 0, width, height);
+            
+            // Draw video (full size)
+            canvasContext.drawImage(recordingWebcam, 0, 0, width, height);
+            
+            // Calculate image size (25% of the width, maintaining aspect ratio)
+            const imgWidth = width * 0.25;
+            const imgHeight = imgWidth * (uploadedImageObj.height / uploadedImageObj.width);
+            
+            // Draw image in top right corner with padding
+            const padding = 10;
+            canvasContext.drawImage(
+                uploadedImageObj, 
+                width - imgWidth - padding, 
+                padding, 
+                imgWidth, 
+                imgHeight
+            );
+            
+            // Add a border around the image
+            canvasContext.strokeStyle = 'white';
+            canvasContext.lineWidth = 3;
+            canvasContext.strokeRect(
+                width - imgWidth - padding, 
+                padding, 
+                imgWidth, 
+                imgHeight
+            );
+            
+            // Continue drawing
+            animationFrameId = requestAnimationFrame(drawCombinedView);
+        }
+        
+        // Start recording
+        async function startRecording() {
+            console.log("Starting recording...");
+            updateStatus('正在启动摄像头...');
+            
+            // Check if image is selected
+            if (!hasSelectedImage) {
+                alert('请先上传一个展示物！');
+                return;
+            }
+            
+            try {
+                console.log("Requesting media access...");
+                // Request webcam access
+                stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: true, 
+                    audio: true 
+                });
+                
+                console.log("Media access granted");
+                updateStatus('摄像头已启动');
+                
+                // Show webcam
+                webcam.srcObject = stream;
+                webcam.classList.remove('hidden');
+                webcamPlaceholder.classList.add('hidden');
+                
+                // Show stop button
+                startButton.classList.add('hidden');
+                stopButton.classList.remove('hidden');
+                
+                // Set up recording view
+                recordingWebcam.srcObject = stream;
+                recordingImage.src = uploadedImage.src;
+                
+                // Switch to recording view
+                mainContainer.classList.add('hidden');
+                recordingContainer.classList.remove('hidden');
+                
+                // Wait for video to load
+                await new Promise(resolve => {
+                    recordingWebcam.onloadedmetadata = () => {
+                        recordingWebcam.play();
+                        resolve();
+                    };
+                });
+                
+                // Set up canvas for combined view
+                combinedCanvas.style.display = 'block';
+                
+                // Start drawing combined view
+                drawCombinedView();
+                
+                // Get canvas stream
+                canvasStream = combinedCanvas.captureStream(30);
+                
+                // Add audio track from original stream to canvas stream
+                if (stream.getAudioTracks().length > 0) {
+                    canvasStream.addTrack(stream.getAudioTracks()[0]);
+                }
+                
+                // Get supported MIME type
+                const mimeType = getSupportedMimeType();
+                if (!mimeType) {
+                    throw new Error('No supported MIME type found for MediaRecorder');
+                }
+                
+                // Set up media recorder with canvas stream
+                console.log("Setting up media recorder with MIME type:", mimeType);
+                updateStatus('准备录制...');
+                
+                const options = { mimeType };
+                mediaRecorder = new MediaRecorder(canvasStream, options);
+                recordedChunks = [];
+                
+                mediaRecorder.ondataavailable = (e) => {
+                    console.log("Data available from media recorder");
+                    if (e.data && e.data.size > 0) {
+                        recordedChunks.push(e.data);
+                    }
+                };
+                
+                mediaRecorder.onstop = () => {
+                    console.log("Media recorder stopped");
+                    updateStatus('录制已完成');
+                    
+                    // Create a blob from the recorded chunks
+                    const blob = new Blob(recordedChunks, { type: mimeType });
+                    playbackVideo.src = URL.createObjectURL(blob);
+                };
+                
+                // Start recording
+                console.log("Starting media recorder...");
+                updateStatus('正在录制...');
+                mediaRecorder.start(1000); // Collect data every second
+                
+                // Create confetti effect
+                createConfetti();
+                
+            } catch (err) {
+                console.error('Error accessing media devices:', err);
+                updateStatus('错误: ' + err.message);
+                
+                // Show permission denied modal
+                permissionDeniedModal.classList.remove('hidden');
+            }
+        }
+        
+        // Stop recording
+        function stopRecording() {
+            console.log("Stopping recording...");
+            updateStatus('正在停止录制...');
+            
+            // Stop animation frame
+            if (animationFrameId) {
+                cancelAnimationFrame(animationFrameId);
+                animationFrameId = null;
+            }
+            
+            // Stop the media recorder
+            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                console.log("Stopping media recorder...");
+                try {
+                    mediaRecorder.stop();
+                } catch (err) {
+                    console.error('Error stopping media recorder:', err);
+                    updateStatus('错误: ' + err.message);
+                }
+            }
+            
+            // Stop all tracks in the stream
+            if (stream) {
+                console.log("Stopping media tracks...");
+                stream.getTracks().forEach(track => track.stop());
+            }
+            
+            // Stop canvas stream
+            if (canvasStream) {
+                canvasStream.getTracks().forEach(track => track.stop());
+            }
+            
+            // Show playback
+            showPlayback();
+        }
+        
+        // Show playback
+        function showPlayback() {
+            console.log("Showing playback");
+            updateStatus('准备播放...');
+            
+            mainContainer.classList.add('hidden');
+            recordingContainer.classList.add('hidden');
+            playbackContainer.classList.remove('hidden');
+            
+            // Create confetti effect
+            createConfetti();
+        }
+        
+        // Reset app
+        function resetApp() {
+            console.log("Resetting app");
+            updateStatus('重置应用...');
+            
+            // Reset UI
+            mainContainer.classList.remove('hidden');
+            recordingContainer.classList.add('hidden');
+            playbackContainer.classList.add('hidden');
+            
+            // Reset webcam
+            webcam.classList.add('hidden');
+            webcamPlaceholder.classList.remove('hidden');
+            
+            // Reset buttons
+            startButton.classList.remove('hidden');
+            stopButton.classList.add('hidden');
+            
+            // Reset canvas
+            if (combinedCanvas) {
+                combinedCanvas.style.display = 'none';
+                if (canvasContext) {
+                    canvasContext.clearRect(0, 0, combinedCanvas.width, combinedCanvas.height);
+                }
+            }
+            
+            updateStatus('准备就绪');
+        }
+        
+        // Download recording
+        function downloadRecording() {
+            console.log("Downloading recording");
+            updateStatus('正在下载...');
+            
+            if (playbackVideo.src) {
+                // Create a temporary link
+                const a = document.createElement('a');
+                a.href = playbackVideo.src;
+                a.download = '我的展示讲解.webm';
+                
+                // Append to the document
+                document.body.appendChild(a);
+                
+                // Trigger the download
+                a.click();
+                
+                // Clean up
+                document.body.removeChild(a);
+                
+                updateStatus('下载完成');
+                
+                // Create confetti effect
+                createConfetti();
+            }
+        }
+        
+        // Create confetti effect
+        function createConfetti() {
+            console.log("Creating confetti");
+            const colors = ['#FF9E80', '#80DEEA', '#FFEB3B', '#CE93D8', '#81C784'];
+            
+            for (let i = 0; i < 50; i++) {
+                const confetti = document.createElement('div');
+                confetti.classList.add('confetti');
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.left = Math.random() * 100 + 'vw';
+                confetti.style.animation = `fall ${Math.random() * 3 + 2}s linear forwards`;
+                document.body.appendChild(confetti);
+                
+                // Remove confetti after animation
+                setTimeout(() => {
+                    if (document.body.contains(confetti)) {
+                        document.body.removeChild(confetti);
+                    }
+                }, 5000);
+            }
+        }
+        
+        // Initialize the app
+        console.log("Starting app initialization");
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'946ca99ce1cd2c14',t:'MTc0ODQyMzg4NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
